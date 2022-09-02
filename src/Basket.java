@@ -19,16 +19,19 @@ public class Basket {
     public void printGoodsList() {
 
         System.out.print(" №       Название   Цена за шт.     В корзине        Стоимость\n" + "");
+
+        double currentValue;
+        totalValue = 0;
         for (int i = 0; i < goods.length; i++) {
+            currentValue = goods[i].getInBasket() * goods[i].getPrice();
+            totalValue += currentValue;
             System.out.printf("%2d. %13s %12.2f %10d %17.2f\n", i + 1,
                     goods[i].getName(), goods[i].getPrice(),
-                    goods[i].getInBasket(), goods[i].getInBasket() * goods[i].getPrice());
+                    goods[i].getInBasket(), currentValue);
         }
         System.out.printf("ИТОГО Товаров в корзине на %10.2f\n\n", totalValue);
         System.out.print("""
-                Добавьте товар в корзину  (№ и количество<ENTER>).
-                Убрать товар из корзины   (№ и количество со знаком <->)
-                Обнулить товар в корзине  (№ и <0>).
+                Добавьте товар в корзину  (№ и количество<ENTER>).                         
                 Для завершения работы введите <end>.
                 """);
     }

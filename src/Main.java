@@ -3,7 +3,7 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class Main {
-    private static Product[] goods = {
+    private static final Product[] goods = {
             new Product("Хлеб", 60.0),
             new Product("Гречка", 92.60),
             new Product("Молоко", 90.0),
@@ -12,7 +12,6 @@ public class Main {
             new Product("Сгущенка", 127.80),
             new Product("Сахар", 75.0)
     };
-    static double totalPrice = 0;
 
     public static void main(String[] args) throws FileNotFoundException {
         Scanner sc = new Scanner(System.in);
