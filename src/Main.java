@@ -16,7 +16,7 @@ public class Main {
     public static void main(String[] args) throws FileNotFoundException {
         Scanner sc = new Scanner(System.in);
         String s; // Пользовательский ввод
-        Basket shoppingCart = new Basket(goods);
+        Basket shoppingCart;
         int selectedItem;
         int itemCount;
 
@@ -25,8 +25,12 @@ public class Main {
         if (basketFile.exists()) {
             System.out.println("Загрузить корзину<ENTER>? ");
             if (sc.nextLine().equals("")) {
-                shoppingCart = shoppingCart.loadFromTxtFile(basketFile);
+                shoppingCart = Basket.loadFromTxtFile(basketFile);
+            } else {
+                shoppingCart = new Basket(goods);
             }
+        } else {
+            shoppingCart = new Basket(goods);
         }
 
         while (true) { // Вертимся тут до ввода end выхода

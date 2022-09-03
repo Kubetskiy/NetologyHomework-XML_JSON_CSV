@@ -1,14 +1,17 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 public class Basket {
     private final Product[] goods;
     private double totalValue = 0;
 
     public Basket(Product[] goods) {
-        this.goods = goods;
+        this.goods = goods.clone();
     }
 
     public void addToCart(int productNum, int amount) {
@@ -50,22 +53,29 @@ public class Basket {
 
     public void saveTxt(File textFile) throws FileNotFoundException {
         var pw = new PrintWriter(textFile);
-        for (int i = 0; i < goods.length; i++) {
-            if (goods[i].getInBasket() > 0) {
-                pw.printf("%d %d\n", i, goods[i].getInBasket());
-            }
+/*
+        for (Product good : goods) {
+            pw.printf("%s@%.4f@%d\n", good.getName(), good.getPrice(), good.getInBasket());
         }
+*/
+        Stream.of(goods).forEach(p ->
+                pw.printf("%s@%.4f@%d\n", p.getName(), p.getPrice(), p.getInBasket()));
         pw.close();
     }
 
-    public Basket loadFromTxtFile(File textFile) throws FileNotFoundException {
+    public static Basket loadFromTxtFile(File textFile) throws FileNotFoundException {
         Scanner sc = new Scanner(textFile);
+        List<Product> goods = new ArrayList<>();
+        String name;
+        double price;
+        int inBasket;
         while (sc.hasNext()) {
-            String[] d = sc.nextLine().split(" ");
-            int productNumber = Integer.parseInt(d[0]);
-            int inBasket = Integer.parseInt(d[1]);
-            goods[productNumber].changeItemInBasket(inBasket);
+            String[] d = sc.nextLine().split("@");
+            name = d[0];
+            price = Double.parseDouble(d[1].replace(',', '.'));
+            inBasket = Integer.parseInt(d[2]);
+            goods.add(new Product(name, price, inBasket));
         }
-        return this;
+        return new Basket(goods.toArray(Product[]::new));
     }
 }
