@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -63,16 +65,18 @@ public class Basket {
         pw.close();
     }
 
-    public static Basket loadFromTxtFile(File textFile) throws FileNotFoundException {
+    public static Basket loadFromTxtFile(File textFile) throws FileNotFoundException, ParseException {
         Scanner sc = new Scanner(textFile);
         List<Product> goods = new ArrayList<>();
         String name;
         double price;
         int inBasket;
+        NumberFormat nf = NumberFormat.getInstance();
         while (sc.hasNext()) {
             String[] d = sc.nextLine().split("@");
             name = d[0];
-            price = Double.parseDouble(d[1].replace(',', '.'));
+//            price = Double.parseDouble(d[1].replace(',', '.'));
+            price = nf.parse(d[1]).doubleValue();
             inBasket = Integer.parseInt(d[2]);
             goods.add(new Product(name, price, inBasket));
         }
