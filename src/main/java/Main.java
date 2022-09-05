@@ -1,6 +1,15 @@
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Scanner;
 
 public class Main {
@@ -13,25 +22,38 @@ public class Main {
             new Product("Сгущенка", 127.80),
             new Product("Сахар", 75.0)
     };
+    private static boolean BASKET_LOAD_ENABLE = false;
+    private static String BASKET_LOAD_FILE_NAME = "";
+    private static FileFormat BASKET_LOAD_FORMAT = FileFormat.JSON;
 
-    public static void main(String[] args) throws IOException {
+    private static boolean BASKET_SAVE_ENABLE = false;
+    private static String BASKET_SAVE_FILE_NAME = "";
+    private static FileFormat BASKET_SAVE_FORMAT = FileFormat.JSON;
+
+    private static boolean LOG_SAVE_ENABLE = false;
+    private static String LOG_FILE_NAME = "";
+
+    public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException, SAXException {
         Scanner sc = new Scanner(System.in);
         String s; // Пользовательский ввод
-        Basket shoppingCart;
+        Basket shoppingCart = null;
         int selectedItem;
         int itemCount;
-
-        var basketFile = new File("basket.txt");
-        var jsonFile = new File("basket.json");
-        var logFile = new File("log.csv");
         var clientLog = new ClientLog();
 
-        if (jsonFile.exists()) {
-            System.out.println("Загрузить корзину<ENTER>? ");
-            if (sc.nextLine().equals("")) {
-                shoppingCart = Basket.loadFromJSON(jsonFile);
-            } else {
-                shoppingCart = new Basket(goods);
+        loadSettings();
+        System.out.println(" ");
+
+        var basketFileForLoad = new File(BASKET_LOAD_FILE_NAME);
+        var basketFileForSave = new File(BASKET_SAVE_FILE_NAME);
+        var logFile = new File(LOG_FILE_NAME);
+
+        if (basketFileForLoad.exists() && BASKET_LOAD_ENABLE) {
+            if (BASKET_LOAD_FORMAT == FileFormat.JSON) {
+                shoppingCart = Basket.loadFromJSON(basketFileForLoad);
+            }
+            if (BASKET_LOAD_FORMAT == FileFormat.TXT) {
+                shoppingCart = Basket.loadFromTxtFile(basketFileForLoad);
             }
         } else {
             shoppingCart = new Basket(goods);
@@ -54,8 +76,14 @@ public class Main {
                         continue;
                     }
                     shoppingCart.addToCart(selectedItem - 1, itemCount);
-//                    shoppingCart.saveTxt(basketFile);
-                    shoppingCart.saveToJSON(jsonFile);
+                    if (BASKET_SAVE_ENABLE) {
+                        if (BASKET_SAVE_FORMAT == FileFormat.JSON) {
+                            shoppingCart.saveToJSON(basketFileForSave);
+                        }
+                        if (BASKET_SAVE_FORMAT == FileFormat.TXT) {
+                            shoppingCart.saveTxt(basketFileForSave);
+                        }
+                    }
                     clientLog.log(selectedItem, itemCount);
                 } catch (NumberFormatException nfe) {
                     // Во вводе что-то отличное от двух целых чисел
@@ -68,9 +96,87 @@ public class Main {
             }
             System.out.println("\nНужно 2 аргумента");
         }
-//        shoppingCart.saveToJSON(jsonFile);
-        clientLog.exportAsCSV(logFile);
+        if (LOG_SAVE_ENABLE) {
+            clientLog.exportAsCSV(logFile);
+        }
         sc.close();
         shoppingCart.printCart();
+    }
+
+    static void loadSettings() throws ParserConfigurationException, IOException, SAXException {
+        // Создается построитель документа
+        DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        // Создается дерево DOM документа из файла
+        Document document = documentBuilder.parse("shop.xml");
+        Node root = document.getDocumentElement();
+
+        String sectionName;
+        String parameterName;
+        String parameterValue;
+        // Просматриваем все подэлементы корневого - т.е. книги
+        NodeList config = root.getChildNodes();
+        for (int i = 0; i < config.getLength(); i++) {
+            Node section = config.item(i);
+            // Если нода не текст, то это подсекция - заходим внутрь
+            if (section.getNodeType() != Node.TEXT_NODE) {  //load, save, log
+                sectionName = section.getNodeName();
+                NodeList options = section.getChildNodes();
+                for (int k = 0; k < options.getLength(); k++) {
+                    Node parameter = options.item(k);
+                    if (parameter.getNodeType() != Node.TEXT_NODE) {
+                        parameterName = parameter.getNodeName();
+                        parameterValue = parameter.getFirstChild().getTextContent();
+                        setOption(sectionName, parameterName, parameterValue);
+                    }
+                }
+//                System.out.println("===========>>>>");
+            }
+
+        }
+
+        System.out.println("");
+    }
+
+    private static void setOption(String sectionName, String parameterName, String parameterValue) {
+//        System.out.println(sectionName+": "+parameterName+": "+parameterValue);
+        if (sectionName.equals("load")) {
+            if (parameterName.equals("enabled")) {
+                BASKET_LOAD_ENABLE = parameterValue.equals("true");
+            }
+            if (parameterName.equals("fileName")) {
+                BASKET_LOAD_FILE_NAME = parameterValue;
+            }
+            if (parameterName.equals("format")) {
+                if (parameterValue.equals("json")) {
+                    BASKET_LOAD_FORMAT = FileFormat.JSON;
+                } else {
+                    BASKET_LOAD_FORMAT = FileFormat.TXT;
+                }
+            }
+        }
+        if (sectionName.equals("save")) {
+            if (parameterName.equals("enabled")) {
+                BASKET_SAVE_ENABLE = parameterValue.equals("true");
+            }
+            if (parameterName.equals("fileName")) {
+                BASKET_SAVE_FILE_NAME = parameterValue;
+            }
+            if (parameterName.equals("format")) {
+                if (parameterValue.equals("json")) {
+                    BASKET_SAVE_FORMAT = FileFormat.JSON;
+                } else {
+                    BASKET_SAVE_FORMAT = FileFormat.TXT;
+                }
+            }
+
+        }
+        if (sectionName.equals("log")) {
+            if (parameterName.equals("enabled")) {
+                LOG_SAVE_ENABLE = parameterValue.equals("true");
+            }
+            if (parameterName.equals("fileName")) {
+                LOG_FILE_NAME = parameterValue;
+            }
+        }
     }
 }
