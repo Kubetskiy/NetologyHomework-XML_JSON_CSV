@@ -131,10 +131,7 @@ public class Main {
                 }
 //                System.out.println("===========>>>>");
             }
-
         }
-
-        System.out.println("");
     }
 
     private static void setOption(String sectionName, String parameterName, String parameterValue) {
