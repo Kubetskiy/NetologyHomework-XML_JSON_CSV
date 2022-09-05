@@ -2,3 +2,6 @@
 out
 *.iml
 basket.txt
+basket.json
+target
+log.csv

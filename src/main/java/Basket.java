@@ -1,6 +1,6 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import com.google.gson.*;
+
+import java.io.*;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -65,6 +65,13 @@ public class Basket {
         pw.close();
     }
 
+    public void saveToJSON(File textFile) throws IOException {
+        var writer = new FileWriter(textFile);
+        var gson = new GsonBuilder().setPrettyPrinting().create();
+        writer.write(gson.toJson(this, Basket.class));
+        writer.close();
+    }
+
     public static Basket loadFromTxtFile(File textFile) throws FileNotFoundException, ParseException {
         Scanner sc = new Scanner(textFile);
         List<Product> goods = new ArrayList<>();
@@ -81,5 +88,13 @@ public class Basket {
             goods.add(new Product(name, price, inBasket));
         }
         return new Basket(goods.toArray(Product[]::new));
+    }
+
+    public static Basket loadFromJSON(File textFile) throws FileNotFoundException {
+        var gson = new Gson();
+        var reader = new FileReader(textFile);
+//        var r = new JsonReader(reader);
+//        return gson.fromJson(r, Basket.class);
+        return gson.fromJson(reader, Basket.class);
     }
 }

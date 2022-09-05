@@ -1,6 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.text.ParseException;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
@@ -14,19 +14,22 @@ public class Main {
             new Product("Сахар", 75.0)
     };
 
-    public static void main(String[] args) throws FileNotFoundException, ParseException {
+    public static void main(String[] args) throws IOException {
         Scanner sc = new Scanner(System.in);
         String s; // Пользовательский ввод
         Basket shoppingCart;
         int selectedItem;
         int itemCount;
 
-        File basketFile = new File("basket.txt");
+        var basketFile = new File("basket.txt");
+        var jsonFile = new File("basket.json");
+        var logFile = new File("log.csv");
+        var clientLog = new ClientLog();
 
-        if (basketFile.exists()) {
+        if (jsonFile.exists()) {
             System.out.println("Загрузить корзину<ENTER>? ");
             if (sc.nextLine().equals("")) {
-                shoppingCart = Basket.loadFromTxtFile(basketFile);
+                shoppingCart = Basket.loadFromJSON(jsonFile);
             } else {
                 shoppingCart = new Basket(goods);
             }
@@ -51,7 +54,9 @@ public class Main {
                         continue;
                     }
                     shoppingCart.addToCart(selectedItem - 1, itemCount);
-                    shoppingCart.saveTxt(basketFile);
+//                    shoppingCart.saveTxt(basketFile);
+                    shoppingCart.saveToJSON(jsonFile);
+                    clientLog.log(selectedItem, itemCount);
                 } catch (NumberFormatException nfe) {
                     // Во вводе что-то отличное от двух целых чисел
                     System.out.println("\nНужно 2 аргумента - 2 целых числа");
@@ -63,6 +68,8 @@ public class Main {
             }
             System.out.println("\nНужно 2 аргумента");
         }
+//        shoppingCart.saveToJSON(jsonFile);
+        clientLog.exportAsCSV(logFile);
         sc.close();
         shoppingCart.printCart();
     }
