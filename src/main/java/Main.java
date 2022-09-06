@@ -22,16 +22,16 @@ public class Main {
             new Product("Сгущенка", 127.80),
             new Product("Сахар", 75.0)
     };
-    private static boolean BASKET_LOAD_ENABLE = false;
-    private static String BASKET_LOAD_FILE_NAME = "";
-    private static FileFormat BASKET_LOAD_FORMAT = FileFormat.JSON;
+    private static boolean basketLoadEnable = false;
+    private static String basketLoadFileName = "";
+    private static FileFormat basketLoadFormat = FileFormat.JSON;
 
-    private static boolean BASKET_SAVE_ENABLE = false;
-    private static String BASKET_SAVE_FILE_NAME = "";
-    private static FileFormat BASKET_SAVE_FORMAT = FileFormat.JSON;
+    private static boolean basketSaveEnable = false;
+    private static String basketSaveFileName = "";
+    private static FileFormat basketSaveFormat = FileFormat.JSON;
 
-    private static boolean LOG_SAVE_ENABLE = false;
-    private static String LOG_FILE_NAME = "";
+    private static boolean logSaveEnable = false;
+    private static String logFileName = "";
 
     public static void main(String[] args) throws IOException, ParseException, ParserConfigurationException, SAXException {
         Scanner sc = new Scanner(System.in);
@@ -44,15 +44,15 @@ public class Main {
         loadSettings();
         System.out.println(" ");
 
-        var basketFileForLoad = new File(BASKET_LOAD_FILE_NAME);
-        var basketFileForSave = new File(BASKET_SAVE_FILE_NAME);
-        var logFile = new File(LOG_FILE_NAME);
+        var basketFileForLoad = new File(basketLoadFileName);
+        var basketFileForSave = new File(basketSaveFileName);
+        var logFile = new File(logFileName);
 
-        if (basketFileForLoad.exists() && BASKET_LOAD_ENABLE) {
-            if (BASKET_LOAD_FORMAT == FileFormat.JSON) {
+        if (basketFileForLoad.exists() && basketLoadEnable) {
+            if (basketLoadFormat == FileFormat.JSON) {
                 shoppingCart = Basket.loadFromJSON(basketFileForLoad);
             }
-            if (BASKET_LOAD_FORMAT == FileFormat.TXT) {
+            if (basketLoadFormat == FileFormat.TXT) {
                 shoppingCart = Basket.loadFromTxtFile(basketFileForLoad);
             }
         } else {
@@ -76,11 +76,11 @@ public class Main {
                         continue;
                     }
                     shoppingCart.addToCart(selectedItem - 1, itemCount);
-                    if (BASKET_SAVE_ENABLE) {
-                        if (BASKET_SAVE_FORMAT == FileFormat.JSON) {
+                    if (basketSaveEnable) {
+                        if (basketSaveFormat == FileFormat.JSON) {
                             shoppingCart.saveToJSON(basketFileForSave);
                         }
-                        if (BASKET_SAVE_FORMAT == FileFormat.TXT) {
+                        if (basketSaveFormat == FileFormat.TXT) {
                             shoppingCart.saveTxt(basketFileForSave);
                         }
                     }
@@ -96,7 +96,7 @@ public class Main {
             }
             System.out.println("\nНужно 2 аргумента");
         }
-        if (LOG_SAVE_ENABLE) {
+        if (logSaveEnable) {
             clientLog.exportAsCSV(logFile);
         }
         sc.close();
@@ -138,41 +138,41 @@ public class Main {
 //        System.out.println(sectionName+": "+parameterName+": "+parameterValue);
         if (sectionName.equals("load")) {
             if (parameterName.equals("enabled")) {
-                BASKET_LOAD_ENABLE = parameterValue.equals("true");
+                basketLoadEnable = parameterValue.equals("true");
             }
             if (parameterName.equals("fileName")) {
-                BASKET_LOAD_FILE_NAME = parameterValue;
+                basketLoadFileName = parameterValue;
             }
             if (parameterName.equals("format")) {
                 if (parameterValue.equals("json")) {
-                    BASKET_LOAD_FORMAT = FileFormat.JSON;
+                    basketLoadFormat = FileFormat.JSON;
                 } else {
-                    BASKET_LOAD_FORMAT = FileFormat.TXT;
+                    basketLoadFormat = FileFormat.TXT;
                 }
             }
         }
         if (sectionName.equals("save")) {
             if (parameterName.equals("enabled")) {
-                BASKET_SAVE_ENABLE = parameterValue.equals("true");
+                basketSaveEnable = parameterValue.equals("true");
             }
             if (parameterName.equals("fileName")) {
-                BASKET_SAVE_FILE_NAME = parameterValue;
+                basketSaveFileName = parameterValue;
             }
             if (parameterName.equals("format")) {
                 if (parameterValue.equals("json")) {
-                    BASKET_SAVE_FORMAT = FileFormat.JSON;
+                    basketSaveFormat = FileFormat.JSON;
                 } else {
-                    BASKET_SAVE_FORMAT = FileFormat.TXT;
+                    basketSaveFormat = FileFormat.TXT;
                 }
             }
 
         }
         if (sectionName.equals("log")) {
             if (parameterName.equals("enabled")) {
-                LOG_SAVE_ENABLE = parameterValue.equals("true");
+                logSaveEnable = parameterValue.equals("true");
             }
             if (parameterName.equals("fileName")) {
-                LOG_FILE_NAME = parameterValue;
+                logFileName = parameterValue;
             }
         }
     }

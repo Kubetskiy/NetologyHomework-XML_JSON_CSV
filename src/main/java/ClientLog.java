@@ -3,14 +3,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class ClientLog {
-    String log = "productNum,amount\n";
+    StringBuilder log ;
 
-    public void log(int productNum, int amount) {
-        log += String.format("%d,%d\n", productNum, amount);
+    public ClientLog() {
+        log = new StringBuilder("productNum,amount\n");
     }
-    public void exportAsCSV (File txtFile) throws IOException {
+
+    public void log(int productNum, int amount)
+    {
+        log.append(String.format("%d,%d\n", productNum, amount));
+    }
+
+    public void exportAsCSV(File txtFile) throws IOException {
         var writer = new FileWriter(txtFile);
-        writer.write(log);
+        writer.write(String.valueOf(log));
         writer.close();
     }
 }
