@@ -93,8 +93,6 @@ public class Basket {
     public static Basket loadFromJSON(File textFile) throws FileNotFoundException {
         var gson = new Gson();
         var reader = new FileReader(textFile);
-//        var r = new JsonReader(reader);
-//        return gson.fromJson(r, Basket.class);
         return gson.fromJson(reader, Basket.class);
     }
 }
